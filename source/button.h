@@ -12,5 +12,7 @@ int button_event(Button b, int mouse_x, int mouse_y); // 0: NONE , 1: HOVERED
 void button_render(SDL_Renderer *rend, Button b);
 int destroyButton(Button b);
 int button_setColorsHovered(SDL_Renderer *rend, Button b, SDL_Color bg, SDL_Color fg);
+void button_setRect(Button b, SDL_Rect rect);
+void button_refreshTextures(SDL_Renderer *rend, Button b);
 
 #endif

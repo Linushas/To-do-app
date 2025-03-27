@@ -31,6 +31,10 @@ SDL_Rect panel_getRect(Panel p) {
         return p->rect;
 }
 
+void panel_setRect(Panel p, SDL_Rect rect) {
+        p->rect = rect;
+}
+
 Panel createPanel(SDL_Rect rect, SDL_Color bg, SDL_Color border_color) {
         Panel panel = malloc(sizeof(struct Panel));
         if (panel == NULL) {

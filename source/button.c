@@ -13,6 +13,54 @@ typedef struct Button {
         char text[64];
 } *Button;
 
+void button_setRect(Button b, SDL_Rect rect) {
+        b->box_rect = rect;
+}
+
+void button_refreshTextures(SDL_Renderer *rend, Button b) {
+        SDL_DestroyTexture(b->font_texture);
+        SDL_DestroyTexture(b->font_hov_texture);
+
+        SDL_Surface *surf = TTF_RenderText_Blended(b->font, b->text, b->fg);
+        if (surf == NULL) {
+                printf("Error: Failed to create text surface for Button.\n");
+                free(b);
+                return;
+        }
+
+        b->font_texture = SDL_CreateTextureFromSurface(rend, surf);
+        if (b->font_texture == NULL) {
+                printf("Error: Failed to create texture from text surface.\n");
+                SDL_FreeSurface(surf);
+                free(b);
+                return;
+        }
+
+        b->text_rect.x = b->box_rect.x + b->box_rect.w/2 - surf->w/2;
+        b->text_rect.y = b->box_rect.y + b->box_rect.h/2 - surf->h/2;
+        b->text_rect.w = surf->w;
+        b->text_rect.h = surf->h;
+
+        SDL_FreeSurface(surf);
+
+        surf = TTF_RenderText_Blended(b->font, b->text, b->hov_fg);
+        if (surf == NULL) {
+                printf("Error: Failed to create text surface for Button.\n");
+                free(b);
+                return;
+        }
+
+        b->font_hov_texture = SDL_CreateTextureFromSurface(rend, surf);
+        if (b->font_hov_texture == NULL) {
+                printf("Error: Failed to create texture from text surface.\n");
+                SDL_FreeSurface(surf);
+                free(b);
+                return;
+        }
+
+        SDL_FreeSurface(surf);
+}
+
 Button createButton(SDL_Renderer *rend, char *text, SDL_Rect rect, SDL_Color bg, SDL_Color fg, TTF_Font *font) {
         Button b = malloc(sizeof(struct Button));
         if (b == NULL) {
