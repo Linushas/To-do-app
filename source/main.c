@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include "linUI.h"
+#include "lib/linUI.h"
 #include "app.h"
 
 int startUp(WM *wm, Panel *panels, UIRes *ui_res, TaskList *tl);

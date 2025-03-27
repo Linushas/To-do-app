@@ -60,29 +60,30 @@ $(EXEC): $(OBJ)
 main.o: $(SRCDIR)/main.c
 	$(CC) $(CFLAGS) $(SRCDIR)/main.c -o main.o
 
-button.o: $(SRCDIR)/button.c
-	$(CC) $(CFLAGS) $(SRCDIR)/button.c -o button.o
-
 app.o: $(SRCDIR)/app.c
 	$(CC) $(CFLAGS) $(SRCDIR)/app.c -o app.o
 
-checklist.o: $(SRCDIR)/checklist.c
-	$(CC) $(CFLAGS) $(SRCDIR)/checklist.c -o checklist.o
+# lib
+button.o: $(SRCDIR)/lib/button.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/button.c -o button.o
 
-slider.o: $(SRCDIR)/slider.c
-	$(CC) $(CFLAGS) $(SRCDIR)/slider.c -o slider.o
+checklist.o: $(SRCDIR)/lib/checklist.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/checklist.c -o checklist.o
 
-text_input_field.o: $(SRCDIR)/text_input_field.c
-	$(CC) $(CFLAGS) $(SRCDIR)/text_input_field.c -o text_input_field.o
+slider.o: $(SRCDIR)/lib/slider.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/slider.c -o slider.o
 
-dropdown_menu.o: $(SRCDIR)/dropdown_menu.c
-	$(CC) $(CFLAGS) $(SRCDIR)/dropdown_menu.c -o dropdown_menu.o
+text_input_field.o: $(SRCDIR)/lib/text_input_field.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/text_input_field.c -o text_input_field.o
 
-panel.o: $(SRCDIR)/panel.c
-	$(CC) $(CFLAGS) $(SRCDIR)/panel.c -o panel.o
+dropdown_menu.o: $(SRCDIR)/lib/dropdown_menu.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/dropdown_menu.c -o dropdown_menu.o
 
-label.o: $(SRCDIR)/label.c
-	$(CC) $(CFLAGS) $(SRCDIR)/label.c -o label.o
+panel.o: $(SRCDIR)/lib/panel.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/panel.c -o panel.o
+
+label.o: $(SRCDIR)/lib/label.c
+	$(CC) $(CFLAGS) $(SRCDIR)/lib/label.c -o label.o
 
 # Clean binaries
 clean: 

@@ -2,7 +2,7 @@
 #define TEXT_INPUT_FIELD_H
 
 #include <stdbool.h>
-#include "SDL_include.h"
+#include "../SDL_include.h"
 
 enum InputStates{INPUT_NONE, INPUT_TEXT, INPUT_BACKSPACE, INPUT_ENTER};
 

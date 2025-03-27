@@ -1,7 +1,7 @@
 #ifndef LABEL_H
 #define LABEL_H
 
-#include "SDL_include.h"
+#include "../SDL_include.h"
 
 typedef struct Label *Label;
 

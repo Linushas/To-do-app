@@ -2,7 +2,7 @@
 #define SLIDER_H
 
 #include <stdbool.h>
-#include "SDL_include.h"
+#include "../SDL_include.h"
 
 typedef struct Slider *Slider;
 

@@ -1,7 +1,7 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include "SDL_include.h"
+#include "../SDL_include.h"
 
 typedef struct Button *Button;
 

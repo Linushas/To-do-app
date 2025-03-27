@@ -2,7 +2,7 @@
 #define UI_EXTRA_H
 
 #include "SDL_include.h"
-#include "linUI.h"
+#include "lib/linUI.h"
 
 #define PANEL_AMOUNT 4
 
