@@ -1,6 +1,6 @@
 
 
-OBJ = main.o button.o panel.o checklist.o label.o text_input_field.o dropdown_menu.o slider.o ui_extra.o #ex på viler 
+OBJ = main.o button.o panel.o checklist.o label.o text_input_field.o dropdown_menu.o slider.o app.o #ex på viler 
 # Hämta OS-namnet via uname. 
 # Om uname inte finns (t.ex. ren Windows utan MSYS), sätt OS till Windows_NT.
 OS := $(shell uname -s 2>/dev/null)
@@ -63,8 +63,8 @@ main.o: $(SRCDIR)/main.c
 button.o: $(SRCDIR)/button.c
 	$(CC) $(CFLAGS) $(SRCDIR)/button.c -o button.o
 
-ui_extra.o: $(SRCDIR)/ui_extra.c
-	$(CC) $(CFLAGS) $(SRCDIR)/ui_extra.c -o ui_extra.o
+app.o: $(SRCDIR)/app.c
+	$(CC) $(CFLAGS) $(SRCDIR)/app.c -o app.o
 
 checklist.o: $(SRCDIR)/checklist.c
 	$(CC) $(CFLAGS) $(SRCDIR)/checklist.c -o checklist.o
