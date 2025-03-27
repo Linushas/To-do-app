@@ -1,16 +1,13 @@
+OBJ = build/main.o build/button.o build/panel.o build/checklist.o build/label.o build/text_input_field.o build/dropdown_menu.o build/slider.o build/app.o
 
-
-OBJ = main.o button.o panel.o checklist.o label.o text_input_field.o dropdown_menu.o slider.o app.o #ex på viler 
-# Hämta OS-namnet via uname. 
-# Om uname inte finns (t.ex. ren Windows utan MSYS), sätt OS till Windows_NT.
+# Detect OS
 OS := $(shell uname -s 2>/dev/null)
 ifeq ($(OS),)
   OS := Windows_NT
 endif
 
 ifeq ($(OS), Darwin)
-    # --- macOS Settings ---
-    # Variables for compiler and flags
+    # macOS Settings
     CC = clang
     CFLAGS = -fsanitize=address -fsanitize=undefined -g -c -Wall -Wextra \
              -I/opt/homebrew/include/SDL2 \
@@ -19,76 +16,61 @@ ifeq ($(OS), Darwin)
              -I/opt/homebrew/include/SDL2_mixer \
              -I/opt/homebrew/include/SDL2_net
     LDFLAGS = -fsanitize=address \
-              -I/opt/homebrew/include/SDL2 \
               -L/opt/homebrew/lib \
               -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf \
               -lSDL2_mixer -lSDL2_net
-
-    # File names
-#Saman satta fil namnet
-    EXEC = Isometric 
-#sök väg för source filse från relevent phat
-	SRCDIR = source
-#remove comand
-	REMOV = rm -f *.o 
-# exequte operator
-	PREFORM =MallocNanoZone=0 ./
-
+    EXEC = build/main
+    SRCDIR = source
+    REMOV = rm -f build/*.o $(EXEC)
+    PREFORM = MallocNanoZone=0 
 else ifeq ($(OS), Windows_NT)
-    # --- Windows (MinGW/MSYS) Settings ---
-    # Adjust these paths for your environment:
+    # Windows Settings
     CC = gcc
-    # If your SDL2 is in C:/SDL2, for example:
-    ####################  LADE TILL: \SDL2      !!
-    INCLUDE=C:\msys64\mingw64\include\SDL2
-	CFLAGS=-g -c -I$(INCLUDE)
-    #################################### # LADE TILL: -lSDL2_ttf -lSDL2_mixer -lSDL2_net        !!
-	LDFLAGS= -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lSDL2_net 
-#-mwindows 
-    EXEC = main.exe
-	SRCDIR = ./source
-	REMOV = del /f *.o
-	PREFORM = ./
-
+    INCLUDE = C:/msys64/mingw64/include/SDL2
+    CFLAGS = -g -c -I$(INCLUDE)
+    LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lSDL2_net
+    EXEC = build/main.exe
+    SRCDIR = source
+    REMOV = del /f build\*.o & del /f build\main.exe
+    PREFORM = 
 endif
 
- # Linking
+# Linking
 $(EXEC): $(OBJ)
 	$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS)
 
-# Compile source code
-main.o: $(SRCDIR)/main.c
-	$(CC) $(CFLAGS) $(SRCDIR)/main.c -o main.o
+# Rules for object files
+build/main.o: $(SRCDIR)/main.c
+	$(CC) $(CFLAGS) $< -o $@
 
-app.o: $(SRCDIR)/app.c
-	$(CC) $(CFLAGS) $(SRCDIR)/app.c -o app.o
+build/app.o: $(SRCDIR)/app.c
+	$(CC) $(CFLAGS) $< -o $@
 
-# lib
-button.o: $(SRCDIR)/lib/button.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/button.c -o button.o
+build/button.o: $(SRCDIR)/lib/button.c
+	$(CC) $(CFLAGS) $< -o $@
 
-checklist.o: $(SRCDIR)/lib/checklist.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/checklist.c -o checklist.o
+build/checklist.o: $(SRCDIR)/lib/checklist.c
+	$(CC) $(CFLAGS) $< -o $@
 
-slider.o: $(SRCDIR)/lib/slider.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/slider.c -o slider.o
+build/slider.o: $(SRCDIR)/lib/slider.c
+	$(CC) $(CFLAGS) $< -o $@
 
-text_input_field.o: $(SRCDIR)/lib/text_input_field.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/text_input_field.c -o text_input_field.o
+build/text_input_field.o: $(SRCDIR)/lib/text_input_field.c
+	$(CC) $(CFLAGS) $< -o $@
 
-dropdown_menu.o: $(SRCDIR)/lib/dropdown_menu.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/dropdown_menu.c -o dropdown_menu.o
+build/dropdown_menu.o: $(SRCDIR)/lib/dropdown_menu.c
+	$(CC) $(CFLAGS) $< -o $@
 
-panel.o: $(SRCDIR)/lib/panel.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/panel.c -o panel.o
+build/panel.o: $(SRCDIR)/lib/panel.c
+	$(CC) $(CFLAGS) $< -o $@
 
-label.o: $(SRCDIR)/lib/label.c
-	$(CC) $(CFLAGS) $(SRCDIR)/lib/label.c -o label.o
+build/label.o: $(SRCDIR)/lib/label.c
+	$(CC) $(CFLAGS) $< -o $@
 
-# Clean binaries
-clean: 
-	$(REMOV) $(EXEC)
+# Clean
+clean:
+	$(REMOV)
 
-# Run the program
-run:  
-	$(PREFORM)$(EXEC)
+# Run
+run: $(EXEC)
+	$(PREFORM) ./$(EXEC)
