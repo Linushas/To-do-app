@@ -1,18 +1,1 @@
-# UI Components for SDL2
-
-## Component list
-- Button
-- Checklist
-- Slider
-- Text Input Feild
-- Dropdown menu
-- Panel
-- Label
-
-### To Do
-- Dialogue
-- Tooltip
-
-## Dependencies
-- SDL2
-- SDL_ttf
+# To-do app made in C using https://github.com/Linushas/Linus_sdl_ui
