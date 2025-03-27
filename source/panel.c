@@ -27,6 +27,10 @@ typedef struct Panel {
         };
 } *Panel;
 
+SDL_Rect panel_getRect(Panel p) {
+        return p->rect;
+}
+
 Panel createPanel(SDL_Rect rect, SDL_Color bg, SDL_Color border_color) {
         Panel panel = malloc(sizeof(struct Panel));
         if (panel == NULL) {

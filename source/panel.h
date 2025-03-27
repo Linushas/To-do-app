@@ -23,5 +23,6 @@ int panel_addComponent(Panel p, int type, void *component, char *key);
 void *panel_getComponent(Panel p, char *key);
 void panel_hideComponent(Panel p, char *key, bool hide);
 void panel_hide(Panel p, bool hide);
+SDL_Rect panel_getRect(Panel p);
 
 #endif

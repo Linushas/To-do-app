@@ -4,7 +4,7 @@
 #include "linUI.h"
 #include "ui_extra.h"
 
-#define PANEL_AMOUNT 5
+#define PANEL_AMOUNT 4
 
 typedef struct Task {
         char name[256];
@@ -17,6 +17,7 @@ typedef struct windowModel {
         SDL_Renderer *rend;
         bool is_running;
         int w, h;
+        bool resized;
 
         int mouse_x, mouse_y;
         bool is_mouse_down;
@@ -42,23 +43,25 @@ int eventHandler(WM *wm, Panel *panels);
 void setTab(Panel *panels, int tab);
 int parseTaskCSV(Task *task_list, int *task_count);
 int saveTasks(Task *task_list, Checklist cl, int task_count);
+int refreshWinow(WM *wm, UIRes *ui_res, Checklist cl, Panel *panels, int *task_count, Task *task_list, int current_tab);
 
 int main(int argc, char **argv) {
         SDL_Init(SDL_INIT_EVERYTHING);
         TTF_Init();
 
         WM wm = {.is_running = true, .w = 600*16/9, .h = 600};
-        wm.win = SDL_CreateWindow("UI test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, wm.w, wm.h, 0);
+        wm.win = SDL_CreateWindow("UI test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, wm.w, wm.h, SDL_WINDOW_RESIZABLE);
         wm.rend = SDL_CreateRenderer(wm.win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
+        
+        int nav_bar_height = 30;
         UIRes ui_res;
         UI_Init(&ui_res);
         Panel panels[PANEL_AMOUNT];
-        panels[0] = createPanel(createRect(0, 0, wm.w, 20), ui_res.raisin_black, ui_res.charcoal);
-        panels[1] = createPanel(createRect(0, 20, wm.w, wm.h - 20), ui_res.raisin_black, ui_res.raisin_black);
-        panels[2] = createPanel(createRect(0, 20, wm.w, wm.h - 20), ui_res.raisin_black, ui_res.raisin_black);
-        panels[3] = createPanel(createRect(0, 20, wm.w, wm.h - 20), ui_res.raisin_black, ui_res.raisin_black);
-        panels[4] = createPanel(createRect(0, 20, wm.w, wm.h - 20), ui_res.raisin_black, ui_res.raisin_black);
+        panels[0] = createPanel(createRect(0, 0, wm.w, nav_bar_height), ui_res.raisin_black, ui_res.charcoal);
+
+        panels[1] = createPanel(createRect(0, nav_bar_height, wm.w, wm.h - nav_bar_height), ui_res.raisin_black, ui_res.raisin_black);
+        panels[2] = createPanel(createRect(0, nav_bar_height, wm.w, wm.h - nav_bar_height), ui_res.raisin_black, ui_res.raisin_black);
+        panels[3] = createPanel(createRect(0, nav_bar_height, wm.w, wm.h - nav_bar_height), ui_res.raisin_black, ui_res.raisin_black);
         UI_Event ui_event;
         setupComponents(wm.rend, panels, ui_res);
         setTab(panels, 0);
@@ -75,10 +78,14 @@ int main(int argc, char **argv) {
         }
         
         int current_tab = 0;
-        int tab_count = 4;
-        char *tab_keys[4] = {"tab_tasks", "tab_categories", "tab_stats", "tab_settings"};
+        int tab_count = 3;
+        char *tab_keys[3] = {"tab_tasks", "tab_stats", "tab_settings"};
         while(wm.is_running) {
                 eventHandler(&wm, panels);
+
+                if(wm.resized) {
+                        refreshWinow(&wm, &ui_res, cl, panels, &task_count, task_list, current_tab);
+                }
 
                 SDL_GetMouseState(&wm.mouse_x, &wm.mouse_y);
                 for(int i = 0; i < PANEL_AMOUNT; i++) {
@@ -124,6 +131,7 @@ int main(int argc, char **argv) {
 
 int eventHandler(WM *wm, Panel *panels) {
         static SDL_Event event;
+        wm->resized = false;
 
         TextInputField tif = panel_getComponent(panels[1], "new_tasks_input");
 
@@ -156,6 +164,11 @@ int eventHandler(WM *wm, Panel *panels) {
                         case SDL_TEXTINPUT:
                                 if(textInputField_getFocus(tif)) {
                                         textInputField_updateBuffer(tif, INPUT_TEXT, event.text.text);
+                                }
+                                break;
+                        case SDL_WINDOWEVENT:
+                                if(event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                                        wm->resized = true;
                                 }
                                 break;
                 }
@@ -228,54 +241,48 @@ void setTab(Panel *panels, int tab) {
 }
 
 int setupComponents(SDL_Renderer *rend, Panel *panels, UIRes ui_res) {
-        Button tabs[4];
-        tabs[0] = createButton(rend, "Tasks", createRect(0, 0, 100, 20), ui_res.charcoal, ui_res.grey, ui_res.montserrat_small);
+        SDL_Rect nav_bar = panel_getRect(panels[0]);
+
+        Button tabs[3];
+        tabs[0] = createButton(rend, "Tasks", createRect(0, 0, nav_bar.w/3, nav_bar.h), ui_res.charcoal, ui_res.grey, ui_res.montserrat_medium);
         panel_addComponent(panels[0], COMPONENT_BUTTON, tabs[0], "tab_tasks");
         button_setColorsHovered(rend, tabs[0], ui_res.slate_grey, ui_res.white);
 
-        tabs[1] = createButton(rend, "Categories", createRect(100, 0, 100, 20), ui_res.charcoal, ui_res.grey, ui_res.montserrat_small);
-        panel_addComponent(panels[0], COMPONENT_BUTTON, tabs[1], "tab_categories");
+        tabs[1] = createButton(rend, "Stats", createRect(nav_bar.w/3, 0, nav_bar.w/3, nav_bar.h), ui_res.charcoal, ui_res.grey, ui_res.montserrat_medium);
+        panel_addComponent(panels[0], COMPONENT_BUTTON, tabs[1], "tab_stats");
         button_setColorsHovered(rend, tabs[1], ui_res.slate_grey, ui_res.white);
 
-        tabs[2] = createButton(rend, "Stats", createRect(200, 0, 100, 20), ui_res.charcoal, ui_res.grey, ui_res.montserrat_small);
-        panel_addComponent(panels[0], COMPONENT_BUTTON, tabs[2], "tab_stats");
+        tabs[2] = createButton(rend, "Settings", createRect(nav_bar.w*2/3, 0, nav_bar.w/3, nav_bar.h), ui_res.charcoal, ui_res.grey, ui_res.montserrat_medium);
+        panel_addComponent(panels[0], COMPONENT_BUTTON, tabs[2], "tab_settings");
         button_setColorsHovered(rend, tabs[2], ui_res.slate_grey, ui_res.white);
 
-        tabs[3] = createButton(rend, "Settings", createRect(300, 0, 100, 20), ui_res.charcoal, ui_res.grey, ui_res.montserrat_small);
-        panel_addComponent(panels[0], COMPONENT_BUTTON, tabs[3], "tab_settings");
-        button_setColorsHovered(rend, tabs[3], ui_res.slate_grey, ui_res.white);
-
         // TASKS TAB
-        Label label = createLabel(rend, 80, 50, "Tasks", ui_res.white, ui_res.montserrat_big);
+        Label label = createLabel(rend, nav_bar.w/2 - 200, 50, "Tasks", ui_res.white, ui_res.montserrat_big);
         panel_addComponent(panels[1], COMPONENT_LABEL, label, "task_label");
 
-        Checklist checklist = createChecklist(100, 100, 40, ui_res.white, ui_res.montserrat_medium);
+        Checklist checklist = createChecklist(nav_bar.w/2 - 180, 100, 40, ui_res.white, ui_res.montserrat_medium);
         panel_addComponent(panels[1], COMPONENT_CHECKLIST, checklist, "task_checklist");
 
-        Button add_task = createButton(rend, "+", createRect(180, 56, 20, 20), ui_res.slate_grey, ui_res.white, ui_res.montserrat_medium);
+        Button add_task = createButton(rend, "+", createRect(nav_bar.w/2 - 100, 56, 20, 20), ui_res.slate_grey, ui_res.white, ui_res.montserrat_medium);
         panel_addComponent(panels[1], COMPONENT_BUTTON, add_task, "add_tasks_button");
         button_setColorsHovered(rend, add_task, ui_res.grey, ui_res.black);
 
-        TextInputField new_task = createTextInputField(rend, createRect(220, 56, 140, 24), ui_res.charcoal, ui_res.grey, ui_res.montserrat_small);
+        TextInputField new_task = createTextInputField(rend, createRect(nav_bar.w/2 - 60, 56, 140, 24), ui_res.charcoal, ui_res.grey, ui_res.montserrat_small);
         panel_addComponent(panels[1], COMPONENT_TEXT_INPUT_FIELD, new_task, "new_tasks_input");
         panel_hideComponent(panels[1], "new_tasks_input", true);
 
-        Button confirm_task = createButton(rend, "Confirm", createRect(361, 55, 70, 26), ui_res.slate_grey, ui_res.white, ui_res.montserrat_small);
+        Button confirm_task = createButton(rend, "Confirm", createRect(nav_bar.w/2 + 81, 55, 70, 26), ui_res.slate_grey, ui_res.white, ui_res.montserrat_small);
         panel_addComponent(panels[1], COMPONENT_BUTTON, confirm_task, "confirm_task_button");
         button_setColorsHovered(rend, confirm_task, ui_res.grey, ui_res.black);
         panel_hideComponent(panels[1], "confirm_task_button", true);
 
-        // CATEGORIES TAB
-        Label label2 = createLabel(rend, 80, 50, "Categories", ui_res.white, ui_res.montserrat_big);
-        panel_addComponent(panels[2], COMPONENT_LABEL, label2, "categories_label");
-
         // STATS TAB
         Label label3 = createLabel(rend, 80, 50, "Stats", ui_res.white, ui_res.montserrat_big);
-        panel_addComponent(panels[3], COMPONENT_LABEL, label3, "stats_label");
+        panel_addComponent(panels[2], COMPONENT_LABEL, label3, "stats_label");
 
         // SETTINGS TAB
         Label label4 = createLabel(rend, 80, 50, "Settings", ui_res.white, ui_res.montserrat_big);
-        panel_addComponent(panels[4], COMPONENT_LABEL, label4, "settings_label");
+        panel_addComponent(panels[3], COMPONENT_LABEL, label4, "settings_label");
         
         return true;
 }
@@ -327,4 +334,31 @@ int UI_Init(UIRes *res) {
         res->raisin_black = createColor(36, 33, 36, 255);
         res->slate_grey = createColor(112, 128, 144, 255);
         return 1;
+}
+
+int refreshWinow(WM *wm, UIRes *ui_res, Checklist cl, Panel *panels, int *task_count, Task *task_list, int current_tab) {
+        int nav_bar_height = 30;
+
+        SDL_GetWindowSize(wm->win, &wm->w, &wm->h);
+        saveTasks(task_list, cl, *task_count);
+        for(int i = 0; i < PANEL_AMOUNT; i++) {
+                destroyPanel(panels[i]);
+        }
+
+        UI_Init(ui_res);
+        panels[0] = createPanel(createRect(0, 0, wm->w, nav_bar_height), ui_res->raisin_black, ui_res->charcoal);
+        panels[1] = createPanel(createRect(0, nav_bar_height, wm->w, wm->h - nav_bar_height), ui_res->raisin_black, ui_res->raisin_black);
+        panels[2] = createPanel(createRect(0, nav_bar_height, wm->w, wm->h - nav_bar_height), ui_res->raisin_black, ui_res->raisin_black);
+        panels[3] = createPanel(createRect(0, nav_bar_height, wm->w, wm->h - nav_bar_height), ui_res->raisin_black, ui_res->raisin_black);
+        setupComponents(wm->rend, panels, *ui_res);
+
+        if(parseTaskCSV(task_list, task_count) != 0)
+                printf("Error reading tasks");
+
+        cl = panel_getComponent(panels[1], "task_checklist");
+        for(int i = 0; i < *task_count; i++) {
+                checklist_addItem(wm->rend, cl, task_list[i].name);
+                checklist_setItemStatus(cl, i, task_list[i].status);
+        }
+        setTab(panels, current_tab);
 }
